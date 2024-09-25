@@ -1,0 +1,99 @@
+﻿@{
+    Layout = "_AdminLayout";
+    var Product = (List<Product>)ViewBag.Product;
+    ViewData["Title"] = "Deleted Product";
+
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">Deleted Product List</div>
+                            <div class="felx">
+                                <a style='margin-right:16px' class="btn btn-dark float-right" href="/Product/ProductList"> Back to Product</a>
+                            </div>
+                            
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>ProductType</th>
+                                                <th>CreateDate</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var m in Product)
+                                            {
+                                                <tr>
+                                                    <td>@m.ProductName</td>
+                                                    <td>@m.ProductTypeId</td>
+                                                    <td>@m.CreateDate.ToString("dd/MM/yyyy")</td>
+                                                    <td>
+                                                        <button class="btn btn-danger" type="button"
+                                                                onclick="RestoreProduct('@m.Id')">
+                                                            Restore
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    function RestoreProduct(Id) {
+        alertify.confirm("Are you sure to Restore this Product!",
+            function () {
+                $.post("/Product/RestoreProduct", { id: Id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == MessageType.Success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 200);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload()
+            }, 3000);
+        }
+    }
+</script>

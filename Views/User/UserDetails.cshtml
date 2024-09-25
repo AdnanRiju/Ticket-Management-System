@@ -1,0 +1,206 @@
+﻿@model CompanyManagement.ViewModel.UserDetailsViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "User Details";
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <h3 class="mb-4">User Details</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card card-primary card-outline">
+                    <div class="card-body box-profile">
+                        <div class="text-center">
+                            <img class="profile-user-img img-fluid img-circle" src="/dist/img/avatar4.png" alt="User profile picture" />
+                        </div>
+
+                        <h3 class="profile-username text-center">@Model.UserName</h3>
+
+                        <ul class="list-group list-group-unbordered mb-3 text-center">
+                            <li class="list-group-item">
+                                <b>Title:</b> <span class="float-right">@Model.UserTitle</span>
+                            </li>
+                            @if (!string.IsNullOrEmpty(Model.ShortName))
+                            {
+                                <li class="list-group-item">
+                                    <b>Short Name:</b> <span class="float-right">@Model.ShortName</span>
+                                </li>
+                            }
+                            <li class="list-group-item">
+                                <b>User Role:</b> <span class="float-right">@(@Model.UserRoleName ?? "N/A")</span>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Admin Access:</b> <span class="float-right">@(@Model.AdminAccess ? "Yes" : "No")</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#details" data-toggle="tab">User Details</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#products" data-toggle="tab">Products Assigned</a>
+                            </li>
+                        </ul>
+                       @*  <div class="card-tools">
+                            <button class="btn btn-warning" data-toggle="modal" data-target="#passwordUpdateModal">
+                                <i class="fas fa-lock"></i> Change Password
+                            </button>
+                        </div> *@
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="details">
+                                <form class="form-horizontal">
+                                    <div class="form-group row">
+                                        <label for="inputTitle" class="col-sm-2 col-form-label">Title</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="inputTitle" value="@Model.UserTitle" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
+                                        <div class="col-sm-10">
+                                            <input type="email" class="form-control" id="inputEmail" value="@Model.UserName" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputRole" class="col-sm-2 col-form-label">Role</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="inputRole" value="@Model.UserRoleName" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputStatus" class="col-sm-2 col-form-label">Status</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="inputStatus" value="@(Model.ActiveStatus == 1 ? "Active" : "Inactive")" readonly>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="tab-pane" id="products">
+                                <h4>Products Assigned:</h4>
+                                <ul class="list-group">
+                                    @if (Model.Products != null && Model.Products.Any())
+                                    {
+                                        foreach (var product in Model.Products)
+                                        {
+                                            <li class="list-group-item">
+                                                @product.ProductName
+                                                <span class="badge @(product.ActiveStatus == 1 ? "badge-success" : "badge-danger")">
+                                                    @(product.ActiveStatus == 1 ? "Active" : "Inactive")
+                                                </span>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="list-group-item">No Products Assigned</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Edit Modal -->
+<div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="userEditModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="userEditModalLabel">Edit User Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="userEditModalBody">
+                <!-- The edit form will be injected here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Update Modal -->
+<div class="modal fade" id="passwordUpdateModal" tabindex="-1" role="dialog" aria-labelledby="passwordUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="passwordUpdateModalLabel">Update Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="User" asp-action="UpdatePassword" data-ajax="true" autocomplete="off">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label for="OldPassword">Old Password</label>
+                        <input type="password" class="form-control" name="oldPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="NewPassword">New Password</label>
+                        <input type="password" class="form-control" name="newPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ConfirmPassword">Confirm Password</label>
+                        <input type="password" class="form-control" name="confirmPassword" required>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-sm btn-success" value="Update Password" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function onSuccess(data) {
+        alert(data.message);
+        if (data.success) {
+            $('#passwordUpdateModal').modal('hide'); // Close modal on success
+            location.reload(); // Optionally reload the page
+        }
+    }
+
+    function onFailed() {
+        alert("An error occurred while processing your request.");
+    }
+
+    $(document).ready(function () {
+        // Handling AJAX form submission
+        $('form[data-ajax]').on('submit', function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            var $form = $(this);
+            var formData = $form.serialize(); // Serialize form data
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: 'POST',
+                data: formData,
+                success: function (data) {
+                    onSuccess(data);
+                },
+                error: function (xhr) {
+                    // Handle error response
+                    var response = JSON.parse(xhr.responseText);
+                    alert(response.StatusMessage);
+                }
+            });
+        });
+    });
+</script>

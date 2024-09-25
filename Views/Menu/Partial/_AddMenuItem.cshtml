@@ -1,0 +1,139 @@
+﻿@model CompanyManagement.ViewModel.VmMenuItem
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+    ViewData["Title"] = ViewBag.TitleName;
+    bool isedit = (bool)(ViewBag.IsEdit);
+}
+
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span><b>@ViewBag.TitleName</b></span>
+            <button type="button" class="close trigger-reload" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+            <form data-ajax-url="@ViewBag.Action"
+                  data-ajax-begin="onBegin" data-ajax-complete="onComplete"
+                  data-ajax-failure="onFailed" data-ajax-success="onSuccess"
+                  data-ajax="true" data-ajax-method="POST" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class=" form-group">
+                            <label class="control-label">Menu Name</label>
+                            <input type="hidden" asp-for="Id" />
+                            <input class="form-control" data-val="true" data-val-required="Please enter the menu name" id="MenuName" asp-for="MenuName" required="required" type="text" placeholder="Menu Name">
+                            <span class="text-danger field-validation-valid" asp-validation-for="MenuName" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="control-label">Is Parent</label>
+                        <select class="form-control" id="IsParent" asp-for="IsParent" required="required">
+                            <option value="-1">Select One</option>
+                            <option value="True">True</option>
+                            <option value="False">False</option>
+                        </select>
+                        <span class="text-danger field-validation-valid" asp-validation-for="IsParent" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="control-label">Select Parent</label>
+                        <select class="form-control search-dropdown-modal" id="IsParent" asp-for="ParentId" asp-items="Model.ParentMenus" required="required">
+                            <option value="0">Select One</option>
+                        </select>
+                        <span class="text-danger field-validation-valid" asp-validation-for="ParentId" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Area Name</label>
+                            <input class="form-control" asp-for="AreaName" type="text" placeholder="Area Name">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Controller Name</label>
+                            <input class="form-control" asp-for="ControllerName" type="text" placeholder="Controller Name">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Method Name</label>
+                            <input class="form-control" asp-for="ActionName" type="text" placeholder="Action Name">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Module Name</label>
+                            <select class="form-control search-dropdown-modal" asp-for="ModuleName" asp-items="Model.Modules" required="required">
+                                <option value="0">Select One</option>
+                            </select>
+                            <span class="text-danger field-validation-valid" asp-validation-for="ModuleName" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Menu URL</label>
+                            <input class="form-control" asp-for="MenuURL" type="text" placeholder="(optional)">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Visibility</label>
+                            <select class="form-control" id="MenuVisibility" asp-for="MenuVisibility" required="required">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                            </select>
+                            <span class="text-danger field-validation-valid" asp-validation-for="MenuVisibility" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Icon</label>
+                            <input class="form-control" id="IconAttribute" asp-for="IconAttribute" type="text" placeholder="fas fa-cogs">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Active Link Name</label>
+                            <input class="form-control" asp-for="ActiveLinkName" type="text" placeholder="Active link name">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class=" form-group">
+                            <label class="control-label">Menu Order</label>
+                            <input class="form-control" asp-for="MenuOrder" required="required" type="number" min="1">
+                            <span class="text-danger field-validation-valid" asp-validation-for="MenuOrder" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-success" value="Save" />
+                    <button type="button" class="btn btn-info trigger-reload" data-dismiss="modal" aria-label="Close">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $(".search-dropdown-modal").select2({
+            placeholder: 'select..'
+        });
+        $('.trigger-reload').on('click', () => {
+            setTimeout(() => {
+                location.reload()
+            }, 300);
+        });
+    });
+</script>
+@* @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+ } *@

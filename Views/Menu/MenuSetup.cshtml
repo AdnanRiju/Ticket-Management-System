@@ -1,0 +1,86 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.VmMenuItem>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = ViewBag.Title;
+    Layout = "_AdminLayout";
+    var BaseUrl = Configuration.GetSection("AppSettings")["BaseUrl"];
+}
+<partial name="~/Views/Shared/_VisualizationScriptsPartial.cshtml" />
+<div id="menuitem-page">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between">
+                                <h4 class="card-title">@ViewBag.Title</h4>
+                                <a class="btn btn-sm btn-primary" onclick="add('/Menu/Add/')"><i class="fas fa-plus"></i> Add</a>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Parent Menu</th>
+                                        <th>Menu Name</th>
+                                        <th>Area</th>
+                                        <th>Controller</th>
+                                        <th>View Name</th>
+                                        <th>Icon</th>
+                                        <th>MenuOrder</th>
+                                        <th>Visibility</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model != null)
+                                    {
+                                        foreach (var menuItem in Model)
+                                        {
+                                            <tr>
+                                                @if (@menuItem.ParentMenuName != null)
+                                                {
+                                                    <td>@menuItem.ParentMenuName</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@menuItem.MenuName</td>
+                                                }
+                                                <td>@menuItem.MenuName</td>
+                                                <td>@menuItem.AreaName</td>
+                                                <td>@menuItem.ControllerName</td>
+                                                <td>@menuItem.ActionName</td>
+                                                <td class="text-center"><i class="@menuItem.IconAttribute"></i> </td>
+                                                <td>@menuItem.MenuOrder</td>
+                                                <td>@menuItem.MenuVisibility</td>
+                                                <td>
+                                                    <a class="btn btn-sm btn-warning" onclick="edit(@menuItem.Id, '/Menu/Edit/')"><i class="fas fa-edit"></i> Edit</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+                <div id="MainModalBody"></div>
+            </div>
+        </div>
+    </section>
+</div>
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<script>
+    $(document).ready(function () {
+        hideloading();
+        LoadDatatable('.datatable', false, 25);
+    });
+</script>

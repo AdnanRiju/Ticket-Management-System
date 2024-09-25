@@ -1,0 +1,70 @@
+﻿@model CompanyManagement.ViewModel.AssignedTicketsViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Assigned Tickets";
+}
+
+<!-- Container div for better layout and margin -->
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+    <!-- Inner div for table styling -->
+    <div class="table-responsive">
+        @if (Model.Tickets.Any())
+        {
+            <table class="table table-striped table-bordered">
+                <thead class="table-info">
+                    <tr>
+                        <th>Ticket No</th>
+                        <th>Subject</th>
+                        <th>Details</th>
+                        <th>Issued Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in Model.Tickets)
+                    {
+                        <tr>
+                            <td>@ticket.TicketNo</td>
+                            <td>@ticket.TicketSubject</td>
+                            <td>@ticket.TicketDetails</td>
+                            <td>@ticket.IssuedDate.ToString("MM/dd/yyyy")</td>
+                            <td>
+                                @switch (ticket.ActiveStatus)
+                                {
+                                    case 1:
+                                        <span class="badge bg-success fs-6 p-2">Active</span>
+                                        break;
+                                    case 2:
+                                        <span class="badge bg-info text-dark">Pending</span>
+                                        break;
+                                    case 3:
+                                        <span class="badge bg-danger">Closed</span>
+                                        break;
+                                    case 4:
+                                        <span class="badge bg-warning">Discarded</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">Unknown</span>;
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <a class="btn btn-dark mr-1" href="/Ticket/Communicate/@ticket.TicketNo">Communicate</a>
+                                <a class="btn btn-info mr-1" href="/Ticket/GetTicketDetails/@ticket.Id">
+                                    <i class="fas fa-list"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No tickets assigned.</p>
+        }
+    </div>
+</div>

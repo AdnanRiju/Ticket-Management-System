@@ -1,0 +1,177 @@
+﻿@model CompanyManagement.ViewModel.ProductManagementViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Assign Product";
+}
+
+<!-- Include validation scripts -->
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <div class="content">
+            <div class="row mt-2" id="mainRow">
+                <!-- Company Selection -->
+                <div id="companyCard" class="col-md-3 company-card">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">Select Company</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <select id="companySelect" class="form-control">
+                                    <option value="">------- Select Company ------</option>
+                                    @foreach (var company in Model.ActiveCompanies)
+                                    {
+                                        <option value="@company.Id">@company.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Management Section -->
+                <div id="productCard" class="col-md-9 product-card" style="display: none;">
+                    <form id="productForm">
+                        <div class="card card-info">
+                            <div class="card-header">
+                                <div class="card-title">Manage Products</div>
+                                <div class="text-center mt-3">
+                                    <a href="/Company/CompanyList" class="btn btn-dark float-right">Back to Company List</a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Product Management Section -->
+                                <div class="product-management">
+                                 
+                                    <div id="assignedProductsContainer" class="row">
+                                        <!-- Assigned products will be dynamically loaded here -->
+                                    </div>
+
+                                    <div id="availableProductsContainer" class="row">
+                                        <!-- Available products will be dynamically loaded here -->
+                                    </div>
+
+                                    <div class="text-center mt-3">
+                                        <button type="button" id="saveChanges" class="btn btn-success" style="display: none;">Save Changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini Alert Box -->
+        <div id="miniAlert" class="mini-alert"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(() => {
+        // Load products when a company is selected
+        $('#companySelect').change(() => {
+            const companyId = $('#companySelect').val();
+            if (companyId) {
+                $('#productCard').show(); // Show the product card
+                LoadProducts(companyId);
+                $('#saveChanges').show(); // Show the Save Changes button
+            } else {
+                $('#productCard').hide(); // Hide the product card
+                $('#assignedProductsContainer').empty();
+                $('#availableProductsContainer').empty();
+                $('#saveChanges').hide();
+            }
+        });
+
+        function LoadProducts(companyId) {
+            $('#assignedProductsContainer').html('<p>Loading assigned products...</p>');
+            $('#availableProductsContainer').html('<p>Loading available products...</p>');
+
+            $.when(
+                $.ajax({
+                    url: '/Company/GetProductsByCompany',
+                    type: 'GET',
+                    data: { companyId: companyId },
+                }),
+                $.ajax({
+                    url: '/Company/GetAvailableProducts',
+                    type: 'GET',
+                    data: { companyId: companyId },
+                })
+            ).then((assignedProductsResponse, availableProductsResponse) => {
+                const assignedProducts = assignedProductsResponse[0];
+                const availableProducts = availableProductsResponse[0];
+
+                let assignedHtml = '';
+                assignedProducts.forEach(product => {
+                    assignedHtml += `
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="product-${product.Id}" value="${product.Id}" checked disabled>
+                                    <label class="form-check-label">${product.ProductName}</label>
+                                </div>
+                            </div>`;
+                });
+
+                let availableHtml = '';
+                availableProducts.forEach(product => {
+                    availableHtml += `
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="product-${product.Id}" name="productIds" value="${product.Id}">
+                                    <label class="form-check-label">${product.ProductName}</label>
+                                </div>
+                            </div>`;
+                });
+
+                $('#assignedProductsContainer').html('<h5>Assigned Products</h5>' + assignedHtml);
+                $('#availableProductsContainer').html('<h5>Available Products</h5>' + availableHtml);
+            });
+        }
+
+        // Handle save changes button click
+        $('#saveChanges').click(() => {
+            const companyId = $('#companySelect').val();
+            const selectedProductIds = $('#availableProductsContainer input:checkbox[name="productIds"]:checked')
+                .map(function () { return $(this).val(); })
+                .get();
+
+            if (selectedProductIds.length === 0) {
+                showAlert('No products selected to add.', 'info');
+                return;
+            }
+
+            $.ajax({
+                url: '/Company/SaveCompanyProducts',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ CompanyId: companyId, ProductIds: selectedProductIds }),
+                success: data => {
+                    showAlert(data.message, data.success ? 'success' : 'info');
+                    if (data.success) {
+                        setTimeout(() => { location.reload(); }, 2000);
+                    }
+                },
+                error: err => {
+                    console.error(err);
+                    showAlert('Error occurred while saving products.', 'danger');
+                }
+            });
+        });
+
+        // Show Bootstrap alert
+        const showAlert = (message, type) => {
+            const alertBox = $('#miniAlert');
+            alertBox.text(message)
+                .removeClass('alert-success alert-info alert-danger')
+                .addClass('alert-' + type)
+                .fadeIn()
+                .delay(3000)
+                .fadeOut();
+        };
+    });
+</script>
+
+

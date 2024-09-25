@@ -1,0 +1,99 @@
+﻿@model CompanyManagement.ViewModel.TicketVm
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Ticket Details";
+}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <!-- Profile Image -->
+                <div class="card card-primary card-outline">
+                    <div class="card-body box-profile">
+                        <div class="text-center">
+                            <img class="profile-user-img img-fluid img-circle"
+                                 src="/dist/img/avatar4.png"
+                                 alt="User profile picture">
+                        </div>
+
+                        <p class="text-muted text-center"> <b>@Model.IssuedByName</b></p>
+
+                        <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item">
+                                <b>Ticket No</b> <a class="float-right">@Model.TicketNo</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Issued Date</b> <a class="float-right">@Model.IssuedDate.ToShortDateString()</a>
+                            </li>
+                           
+                            <li class="list-group-item">
+                                <b>Active Status </b> <a class="float-right">@Model.StatusString</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Product  </b> <a class="float-right">@Model.ProductName</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Issued Date  </b> <a class="float-right">@Model.IssuedDate.ToString("dd/MM/yyyy")</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <div class="text-center mt-3">
+                            <h3>Ticket Details</h3>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="/" class="btn btn-dark float-right">Back</a>
+                            
+                            <a class="btn btn-info  float-right " href="@Url.Action("Communicate", "Ticket", new { id = Model.TicketId })">View Conversations</a>
+                        </div>
+                    </div><!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="tab-pane" id="details">
+                            <form class="form-horizontal">
+                                <div class="form-group row">
+                                    <label for="inputName" class="col-sm-2 col-form-label">Ticket Subject</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="inputName" value="@Model.TicketSubject" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="inputDetails" class="col-sm-2 col-form-label">Ticket Details</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="inputDetails" readonly>@Model.TicketDetails</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="inputDetails" class="col-sm-2 col-form-label">Assigned Name</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="inputDetails" readonly>@Model.AssignedName</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="inputDetails" class="col-sm-2 col-form-label">Complete By</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" id="inputDetails" readonly>@Model.CompleteByName</textarea>
+                                    </div>
+                                </div>
+                                <!-- Add other fields as necessary -->
+                            </form>
+                        </div>
+                        <!-- /.tab-pane -->
+                    </div>
+                    <!-- /.card-body -->
+                </div><!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>

@@ -1,0 +1,172 @@
+﻿@{
+    Layout = "_AdminLayout";
+    var users = (List<User>)ViewBag.Users;
+    var menus = (List<MenuItem>)ViewBag.Menus;
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card card-info">
+                        <div class="card-header ">
+                            <div class="card-title">Users</div>
+                      @*       <button class="btn btn-sm btn-default float-right" onclick="add('AddProject')">Add New</button> *@
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    @foreach (var item in users)
+                                    {
+                                        <div class="info-box bg-info">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text" style="padding-bottom: 5px;"> <b>@item.UserName</b> </span>
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                                                   @*  <button class="btn btn-sm btn-warning" onclick="edit(@item.Id,'EditProject/')"><i class="fas fa-edit"></i> Edit</button>
+                                                    <button type="submit" value="Delete" class="btn btn-danger"
+                                                            onclick="DeleteId(@item.Id)">
+                                                        Delete
+                                                    </button> *@
+                                                    <button class="btn btn-sm btn-default" onclick="LoadMenusByUsers(@item.Id,'@item.UserName')"><i class="fas fa-cog"></i>Control</button>
+                                                </div>
+                                            </div>
+                                            <!-- /.info-box-content -->
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-9">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Menus</h4>
+                        </div>
+                        <!-- /.card-header -->
+                        <div id="project-list" class="card-body">
+                            <div class="role-content" style="min-height: 40px;"></div>
+                            @if (users != null)
+                            {
+                                <div class="row">
+                                    @foreach (var item in menus)
+                                    {
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input form" id="@item.Id" value="@item.Id">
+                                                <label class="form-check-label">@item.MenuName</label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+    function DeleteId(Id) {
+        alertify.confirm("Are you sure you want to delete this item!",
+            function () {
+                $.post("/ManageProject/Delete", { id: Id }, function (response) {
+                    console.log(response);
+
+                    if (response.success) {
+                        toastr.error(response.message);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    } else {
+                        toastr.warning(response.message);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload()
+            }, 3000);
+        }
+    }
+
+    function LoadMenusByUsers(id, UserName) {
+        $('#project-list input:checkbox').each(function () {
+            if (this.checked) {
+                $(this).prop("checked", false);
+            }
+        });
+        $.ajax({
+            url: '/Menu/GetUsers',
+            type: 'GET',
+            data: { 'id': id },
+            contentType: 'application/json',
+            success: function (data) {
+                $.each(data, function (key, value) {
+                    $('#' + value.MenuItemId).prop("checked", true);
+                });
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+        var roledivcontent = '<div class="row pb-2 pl-1">';
+        roledivcontent += '<div class="col-md-3">';
+        roledivcontent += '<button class="btn btn-success" onclick="SaveUserMenus()">Update</button>';
+        roledivcontent += '</div>';
+        roledivcontent += '<div class="col-md-9">';
+        roledivcontent += '<div class="para-box">';
+        roledivcontent += '<input type="hidden" name="userid" id="userid" value="' + id + '" />';
+        roledivcontent += '<p class="para">Selected Users  :-  <strong>' + UserName + '</strong></p>';
+        roledivcontent += '</div>';
+        roledivcontent += '</div>';
+        roledivcontent += '</div>';
+        $('.role-content').html(roledivcontent);
+        $('#save-section').removeClass('hide');
+    }
+    var SaveUserMenus = function () {
+        var usermodel = [];
+        var userId = $("#userid").val();
+        $('#project-list input:checkbox').each(function () {
+            if (this.checked) {
+                var roleMenus = { UserId: parseInt(userId), MenuItemId: parseInt($(this).val()) };
+                usermodel.push(roleMenus);
+            }
+        });
+    @* var roleMenuJson = JSON.stringify({ 'oldlist': projectmodel }); *@
+            //console.log(usermodel);
+            $.ajax({
+                url: '/Menu/SaveUserMenus',
+                type: 'POST',
+                data: { 'roleMenus': usermodel },
+    @*contentType: 'application/json',*@
+                success: function (data) {
+                    console.log(data);
+                    ToastNotification(data);
+                },
+                error: function () {
+                    alert("error");
+                }
+                    });
+                }
+</script>

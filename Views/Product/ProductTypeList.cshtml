@@ -1,0 +1,84 @@
+﻿
+@{
+    Layout = "_AdminLayout";
+    var ProductType = (List<ProductType>)ViewBag.ProductType;
+    ViewData["Title"] = "Product Type";
+
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="wrapper">
+    <div class="container-fluid align-middle">
+        <section class="content">
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title"> Product Type List</div>
+                         </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                               
+                                                <th>Product Type</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var m in ProductType)
+                                            {
+
+                                                <tr>
+                                                    <td>@m.Product_Type</td>
+                                                    
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+<script>
+    function ProductDelete(Id) {
+        alertify.confirm("Are you sure to delete this User!",
+            function () {
+                $.post("/Product/ProductTypeList", { id: Id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == MessageType.Success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload()
+            }, 3000);
+        }
+    }
+</script>

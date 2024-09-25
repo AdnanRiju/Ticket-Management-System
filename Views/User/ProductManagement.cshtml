@@ -1,0 +1,176 @@
+﻿@model IEnumerable<CompanyManagement.Models.User> 
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Assign Product";
+}
+
+<!-- Include validation scripts -->
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <div class="content">
+            <div class="row mt-2" id="mainRow">
+                <!-- User Selection -->
+                <div id="UserCard" class="col-md-3 User-card">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">Select User</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <select id="UserSelect" class="form-control">
+                                    <option value="">------- Select User ------</option>
+                                    @foreach (var user in Model)
+                                    {
+                                        <option value="@user.Id">@user.UserName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Management Section -->
+                <div id="productCard" class="col-md-9 product-card" style="display: none;">
+                    <form id="productForm">
+                        <div class="card card-info">
+                            <div class="card-header">
+                                <div class="card-title">Manage Products</div>
+                                <div class="text-center mt-3">
+                                    <a href="/User/UserList" class="btn btn-dark float-right">Back to User List</a>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Product Management Section -->
+                                <div class="product-management">
+                                    <div id="assignedProductsContainer" class="row">
+                                        <!-- Assigned products will be dynamically loaded here -->
+                                    </div>
+
+                                    <div id="availableProductsContainer" class="row">
+                                        <!-- Available products will be dynamically loaded here -->
+                                    </div>
+
+                                    <div class="text-center mt-3">
+                                        <button type="button" id="saveChanges" class="btn btn-success" style="display: none;">Save Changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini Alert Box -->
+        <div id="miniAlert" class="mini-alert"></div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(() => {
+        // Load products when a User is selected
+        $('#UserSelect').change(() => {
+            const userId = $('#UserSelect').val();
+            if (userId) {
+                $('#productCard').show(); // Show the product card
+                LoadProducts(userId);
+                $('#saveChanges').show(); // Show the Save Changes button
+            } else {
+                $('#productCard').hide(); // Hide the product card
+                $('#assignedProductsContainer').empty();
+                $('#availableProductsContainer').empty();
+                $('#saveChanges').hide();
+            }
+        });
+
+        function LoadProducts(userId) {
+            $('#assignedProductsContainer').html('<p>Loading assigned products...</p>');
+            $('#availableProductsContainer').html('<p>Loading available products...</p>');
+
+            $.when(
+                $.ajax({
+                    url: '/User/GetProductsByUser',
+                    type: 'GET',
+                    data: { userId: userId },
+                }),
+                $.ajax({
+                    url: '/User/GetAvailableProducts',
+                    type: 'GET',
+                    data: { userId: userId },
+                })
+            ).then((assignedProductsResponse, availableProductsResponse) => {
+                const assignedProducts = assignedProductsResponse[0];
+                const availableProducts = availableProductsResponse[0];
+
+                let assignedHtml = '';
+                assignedProducts.forEach(product => {
+                    assignedHtml += `
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="product-${product.Id}" value="${product.Id}" checked disabled>
+                                <label class="form-check-label">${product.ProductName}</label>
+                            </div>
+                        </div>`;
+                });
+
+                let availableHtml = '';
+                availableProducts.forEach(product => {
+                    availableHtml += `
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="product-${product.Id}" name="productIds" value="${product.Id}">
+                                <label class="form-check-label">${product.ProductName}</label>
+                            </div>
+                        </div>`;
+                });
+
+                $('#assignedProductsContainer').html('<h5>Assigned Products</h5>' + assignedHtml);
+                $('#availableProductsContainer').html('<h5>Available Products</h5>' + availableHtml);
+            });
+        }
+
+        // Handle save changes button click
+        $('#saveChanges').click(() => {
+            const userId = $('#UserSelect').val();
+            const selectedProductIds = $('#availableProductsContainer input:checkbox[name="productIds"]:checked')
+                .map(function () { return $(this).val(); })
+                .get();
+
+            if (selectedProductIds.length === 0) {
+                showAlert('No products selected to add.', 'info');
+                return;
+            }
+
+            $.ajax({
+                url: '/User/SaveUserProducts',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ CompanyId: userId, ProductIds: selectedProductIds }), // CompanyId here represents UserId
+                success: data => {
+                    showAlert(data.message, data.success ? 'success' : 'info');
+                    if (data.success) {
+                        setTimeout(() => { location.reload(); }, 2000);
+                    }
+                },
+                error: err => {
+                    console.error(err);
+                    showAlert('Error occurred while saving products.', 'danger');
+                }
+            });
+        });
+
+        // Show Bootstrap alert
+        const showAlert = (message, type) => {
+            const alertBox = $('#miniAlert');
+            alertBox.text(message)
+                .removeClass('alert-success alert-info alert-danger')
+                .addClass('alert-' + type)
+                .fadeIn()
+                .delay(3000)
+                .fadeOut();
+        };
+    });
+</script>

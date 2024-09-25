@@ -1,0 +1,68 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.TicketVm>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Processing Tickets";
+}
+
+<div class="container">
+    <h2>Processing Tickets</h2>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ticket No</th>
+                <th>Issued By</th>
+                
+                <th>Product</th>
+               
+                <th>Subject</th>
+                <th>Details</th>
+               
+               
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ticket in Model)
+            {
+                <tr>
+                    <td>@ticket.TicketNo</td>
+                    <td>@ticket.IssuedByName</td>
+                  
+                    <td>@ticket.ProductName</td>
+                   
+                    <td>@ticket.TicketSubject</td>
+                    <td>@ticket.TicketDetails</td>
+                   
+                    <td>
+                        <a class="btn btn-info btn-sm" href="@Url.Action("Communicate", "Ticket", new { id = ticket.TicketId })">Communicate</a>
+                        <button class="btn btn-danger btn-sm" onclick="UserDelete(@ticket.TicketId)">Close</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+<script>
+    function UserDelete(id) {
+        alertify.confirm("Are you sure to delete this User!",
+            function () {
+                $.post("/Ticket/CloseTicket", { id: id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == "Success") {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+</script>

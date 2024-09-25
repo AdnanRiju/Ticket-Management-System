@@ -1,0 +1,62 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.TicketVm>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Processing Tickets";
+}
+
+<div class="container">
+    <h3>Processing Tickets</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ticket No</th>
+                <th>Issued By</th>
+                <th>Issued Date</th>
+                <th>Product</th>
+                <th>Service Type</th>
+                <th>Subject</th>
+                <th>Details</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ticket in Model)
+            {
+                <tr>
+                    <td>@ticket.TicketNo</td>
+                    <td>@ticket.IssuedByName</td>
+                    <td>@ticket.IssuedDate.ToShortDateString()</td>
+                    <td>@ticket.ProductName</td>
+                    <td>@ticket.ServiceTypeName</td>
+                    <td>@ticket.TicketSubject</td>
+                    <td>@ticket.TicketDetails</td>
+                    <td>
+                        @{
+                            string statusText;
+                            switch (ticket.ActiveStatus)
+                            {
+                                case 1:
+                                    statusText = "Active";
+                                    break;
+                                case 2:
+                                    statusText = "Processing";
+                                    break;
+                                case 3:
+                                    statusText = "Closed";
+                                    break;
+                                case 4:
+                                    statusText = "Discarded";
+                                    break;
+                                default:
+                                    statusText = "Unknown";
+                                    break;
+                            }
+                        }
+                        @statusText
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,58 @@
+﻿@model CompanyManagement.ViewModel.TicketChatViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Ticket Chat";
+}
+
+<div class="container">
+    <h3>Ticket #@Model.TicketId</h3>
+
+    <!-- Display previous messages -->
+    @foreach (var message in Model.PreviousMessages)
+    {
+        <div class="post">
+            <div class="user-block">
+                <!-- Display user image or a placeholder if not available -->
+                <img class="img-circle img-bordered-sm" src="@Url.Content("/dist/img/avatar2.png")" alt="user image">
+                <span class="username">
+                    <a href="#">@(message.UserId)</a>
+                    <!-- Add a button to remove the message (optional) -->
+                    <a href="#" class="float-right btn-tool"><i class="fas fa-times"></i></a>
+                </span>
+                <span class="description">
+                    @message.CreatedDate.ToString("h:mm tt")
+                </span>
+            </div>
+            <!-- /.user-block -->
+            <p>@message.ChatMessage</p>
+
+            @if (!string.IsNullOrEmpty(message.FileUploadPath))
+            {
+                <a href="@message.FileUploadPath" target="_blank">
+                    <img src="@message.FileUploadPath" alt="uploaded file" style="max-width: 100%; border-radius: 10px;">
+                </a>
+            }
+        </div>
+        <!-- /.post -->
+    }
+
+    <!-- Form for adding a new message -->
+    <form asp-action="Communicate" asp-controller="Ticket" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="TicketId" />
+        <input type="hidden" asp-for="UserId" />
+        <input type="hidden" asp-for="CreatedDate" />
+
+        <div class="form-group">
+            <textarea asp-for="ChatMessage" class="form-control" placeholder="Type a message" rows="3" ></textarea>
+            <span asp-validation-for="ChatMessage" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <input type="file" asp-for="FileUpload" class="form-control-file" />
+            <span asp-validation-for="FileUpload" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>

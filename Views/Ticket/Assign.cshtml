@@ -1,0 +1,95 @@
+﻿@model CompanyManagement.ViewModel.AssignTicketViewModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Assign User";
+}
+
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+            <span><b>@ViewData["Title"]</b></span>
+            <button type="button" class="close trigger-reload text-white" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form asp-controller="Ticket" asp-action="Assign" method="post" id="assignUserForm" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Ticket.Id" />
+
+                <div class="card-body">
+                    <div class="form-group row">
+                        <input type="hidden" asp-for="Ticket.IssuedBy" />
+                        <input type="hidden" asp-for="Ticket.ActiveStatus" />
+                        <input type="hidden" asp-for="Ticket.CustomerStatus" />
+                        <input type="hidden" asp-for="Ticket.IssuedDate" />
+                        <input type="hidden" asp-for="Ticket.ManagementTicketStatus" />
+                        <input type="hidden" asp-for="Ticket.TicketNo" />
+                        <input type="hidden" asp-for="Ticket.ProductId" />
+                        <input type="hidden" asp-for="Ticket.ServiceTypeId" />
+
+                        <div class="form-group col-md-12">
+                            <label asp-for="Ticket.TicketSubject">Subject</label>
+                            <input asp-for="Ticket.TicketSubject" class="form-control" readonly />
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <label asp-for="Ticket.TicketDetails">Details</label>
+                            <textarea asp-for="Ticket.TicketDetails" class="form-control" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label class="control-label">Assign User</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select asp-for="Ticket.Assigned" asp-items="Model.Users" class="form-control">
+                                <option value="">Select One</option>
+                            </select>
+                            <span asp-validation-for="Ticket.Assigned" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer float-right">
+                    <input type="submit" class="btn btn-sm btn-success" value="Save" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#assignUserForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message); // Show success message
+                        window.location.href = response.redirectUrl; // Redirect to the specified URL
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while processing your request.");
+                }
+            });
+        });
+
+        $('.trigger-reload').on('click', function () {
+            setTimeout(() => {
+                location.reload();
+            }, 100);
+        });
+    });
+</script>

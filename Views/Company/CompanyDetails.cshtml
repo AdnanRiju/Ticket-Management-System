@@ -1,0 +1,189 @@
+﻿@model CompanyManagement.ViewModel.CompanyDetailsViewModel
+
+@{
+    ViewData["Title"] = "Company Details";
+    Layout = "_AdminLayout";
+}
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <h3 class="mb-4">Company Details</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <!-- Profile Image -->
+                <div class="card card-primary card-outline">
+                    <div class="card-body box-profile">
+                        <div class="text-center">
+                            <img class="profile-user-img img-fluid img-circle"
+                                 src="../../dist/img/user4-128x128.jpg"
+                                 alt="User profile picture">
+                        </div>
+
+                        <h3 class="profile-username text-center">@Model.Company.Name</h3>
+
+                        <p class="text-muted text-center">@Model.Company.Email</p>
+
+                        <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item">
+                                <b>Phone</b> <a class="float-right">@Model.Company.PhoneNumber</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Address</b> <a class="float-right">@Model.Company.Address</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Status</b> <a class="float-right">@(@Model.Company.ActiveCompany == 1 ? "Active" : "Inactive")</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item"><a class="nav-link active" href="#settings" data-toggle="tab">Company Details</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#products" data-toggle="tab">Products</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#users" data-toggle="tab">Users</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="settings">
+                                <form class="form-horizontal">
+                                    <!-- Company details form can go here -->
+                                </form>
+                            </div>
+
+                            <div class="tab-pane" id="products">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4>Products</h4>
+                                    <button id="assignProductsBtn" class="btn btn-primary btn-sm">Assign Products</button>
+                                </div>
+                                <ul class="list-group">
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <li class="list-group-item">
+                                            @product.ProductName
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+
+                            <div class="tab-pane" id="users">
+                                <h4>Users</h4>
+                                <ul class="list-group">
+                                    @if (Model.Users != null && Model.Users.Any())
+                                    {
+                                        foreach (var user in Model.Users)
+                                        {
+                                            <li class="list-group-item">
+                                                @user.UserName
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li class="list-group-item">No users found for this company.</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal for assigning products -->
+<div class="modal fade" id="assignProductsModal" tabindex="-1" role="dialog" aria-labelledby="assignProductsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignProductsModalLabel">Assign Products</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h6>Available Products</h6>
+                <div id="availableProductsContainer">
+                    <!-- This will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="confirmAssignProductsBtn" class="btn btn-primary">Assign Selected Products</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var companyId = @Model.Company.Id;
+
+            // Open the modal when the button is clicked
+            $('#assignProductsBtn').click(function () {
+                LoadAvailableProducts(companyId);
+                $('#assignProductsModal').modal('show');
+            });
+
+            function LoadAvailableProducts(companyId) {
+                $.get('@Url.Action("GetAvailableProducts", "Company")', { companyId: companyId }, function (data) {
+                    var container = $('#availableProductsContainer');
+                    container.empty();
+                    $.each(data, function (index, product) {
+                        container.append(
+                            '<div class="form-check">' +
+                            '<input class="form-check-input" type="checkbox" value="' + product.Id + '" id="availableProduct' + product.Id + '">' +
+                            '<label class="form-check-label" for="availableProduct' + product.Id + '">' +
+                            product.ProductName +
+                            '</label>' +
+                            '</div>'
+                        );
+                    });
+                });
+            }
+
+            // Handle product assignment
+            $('#confirmAssignProductsBtn').click(function () {
+                var selectedProductIds = [];
+                $('#availableProductsContainer input[type=checkbox]:checked').each(function () {
+                    selectedProductIds.push($(this).val());
+                });
+
+                if (selectedProductIds.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("SaveCompanyProducts", "Company")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            CompanyId: companyId,
+                            ProductIds: selectedProductIds
+                        }),
+                        success: function (response) {
+                            handleResponse(response);
+                        },
+                        error: function () {
+                            alert("An error occurred while assigning products.");
+                        }
+                    });
+                } else {
+                    alert("Please select at least one product to assign.");
+                }
+            });
+
+            function handleResponse(response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload(); // Refresh the page to see changes
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    </script>
+}

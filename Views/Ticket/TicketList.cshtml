@@ -1,0 +1,98 @@
+﻿@using CompanyManagement.ViewModel
+
+@{
+    Layout = "_AdminLayout";
+    var tickets = (List<TicketVm>)ViewBag.Ticket;
+    ViewData["Title"] = "Ticket List";
+}
+
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">Ticket List</div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="/Ticket/AssignedTickets mr-1" class="btn btn-danger float-right">AssignedTickets</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                               
+                                                <th>User Name</th>
+                                                <th>Ticket Subject</th>
+                                                <th>Issue Date</th>
+                                                <th>Ticket Details</th>
+                                                <th>Assigned</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var m in tickets)
+                                            {
+                                                <tr>
+                                                   
+                                                    <td>@m.IssuedByName</td>
+                                                    <td>@m.TicketSubject</td>
+                                                    <td>@m.IssuedDate.ToString("dd/MM/yyyy")</td>
+                                                    <td>@m.TicketDetails</td>
+                                                    <td>@m.CompleteBy</td>
+                                                    <td><b>@m.StatusString</b></td>
+                                                    <td>
+                                                        <a class="btn btn-info mr-1" href="/Ticket/GetTicketDetails/@m.Id">Details</a>
+                                                        <a class="btn btn-dark mr-1" href="/Ticket/Communicate/@m.Id">Communicate</a>
+                                                        <a class="btn btn-primary mr-1" href="/Ticket/Assign/@m.Id">Assign</a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true,
+            "lengthChange": false,
+            "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+
+    function ProductDelete(Id) {
+        alertify.confirm("Are you sure to delete this User!",
+            function () {
+                $.post("/Product/ProductDelete", { id: Id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType === MessageType.Success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+</script>

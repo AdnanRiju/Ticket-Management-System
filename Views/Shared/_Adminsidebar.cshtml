@@ -1,0 +1,137 @@
+﻿@using Microsoft.AspNetCore.Http
+@using CompanyManagement.Helper
+@using CompanyManagement.Models
+@using CompanyManagement.ViewModel
+@using CompanyManagement.Helper
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var sessionuser = (VmUser)HttpContextAccessor.HttpContext.Session.GetComplexData<VmUser>("UserInformation");
+    var companyInfo = (Company)HttpContextAccessor.HttpContext.Session.GetComplexData<Company>("CompanyInfo");
+
+    string currenturl = Context.Request.Path;
+}
+<style>
+    .brand-link .brand-image {
+        margin-top: 0px;
+    }
+</style>
+<!-- vue.js javascript -->
+<script src="~/js/vue.js"></script>
+<script src="~/js/vuehelper.js"></script>
+<div id="vue-sidebar">
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="~/Dashboard/Index" class="brand-link">
+            <span class="brand-text font-weight-light">@companyInfo.ShortName</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar user panel (optional) -->
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <img src="~/dist/img/avatar4.png" class="img-circle elevation-2" alt="User Image">
+                </div>
+                <div class="info">
+                    <a href="#" class="d-block">@sessionuser.UserTitle</a>
+                    @*{{currenturi}}*@
+                </div>
+            </div>
+
+            <!-- SidebarSearch Form -->
+            <div class="form-inline">
+                <div class="input-group" data-widget="sidebar-search">
+                    <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-sidebar">
+                            <i class="fas fa-search fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Menu -->
+            <nav class="mt-2" style="padding-bottom: 20px">
+                <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
+                    <!-- Add icons to the links using the .nav-icon class
+                         with font-awesome or any other icon font library -->
+                    <template v-for="item in menuitems">
+                        <template v-if="item.ChildMenus.length == 0">
+                            <li class="nav-item">
+                                <a :href="item.MenuURL" :class="['nav-link', (current_area.toLowerCase() == item.AreaName.toLowerCase()) ? 'active' : '']">
+                                    <i :class="['nav-icon', item.IconAttribute]"></i>
+                                    <p> {{item.MenuName}} </p>
+                                </a>
+                            </li>
+                        </template>
+                        <template v-else>
+                            <li :class="['nav-item', (current_area.toLowerCase() == item.AreaName.toLowerCase()) ? 'menu-open' : '']">
+                                <a href="#" :class="['nav-link', (current_area.toLowerCase() == item.AreaName.toLowerCase()) ? 'active' : '']">
+                                    <i :class="['nav-icon', item.IconAttribute]"></i>
+                                    <p>
+                                        {{item.MenuName}}
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <template v-for="child in item.ChildMenus">
+                                        <li class="nav-item">
+                                            <a :href="child.MenuURL" :class="['nav-link', (current_link == child.ActiveLinkName) ? 'active' : '']">
+                                                <i :class="['nav-icon', child.IconAttribute]"></i>
+                                                <p>
+                                                    {{child.MenuName}}
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </li>
+                        </template>
+                    </template>
+                </ul>
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+</div>
+@*class="far fa-circle nav-icon"*@
+<script>
+    const sidebarapp = {
+        data() {
+            return {
+                menuitems: [],
+                getUrl: '/Menu/ListMenuItemsForSideBar',
+                currenturi: '',
+                current_area: '',
+                current_link: '',
+                mainmenu: '',
+            }
+        },
+        mounted: function () {
+            this.currenturi = '@currenturl';
+            this.getcurrenturi();
+            if (this.menuitems.length < 1) {
+                this.loadMenuItems();
+            }
+        },
+        methods: {
+            loadMenuItems() {
+                let self = this;
+                fetch(self.getUrl).then((response) => response.json()).then((data) => {
+                    console.log(data);
+                    self.menuitems = data;
+                });
+            },
+            getcurrenturi() {
+                this.mainmenu = this.currenturi.split('/')[1];
+                this.current_area = this.currenturi.split('/')[1];
+                this.current_link = this.currenturi.split('/')[2];
+                console.log(this.current_area);
+                console.log(this.current_link);
+            }
+        }
+    }
+    Vue.createApp(sidebarapp).mount('#vue-sidebar')
+</script>

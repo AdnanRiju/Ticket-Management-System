@@ -1,0 +1,84 @@
+﻿@model IEnumerable<CompanyManagement.Models.TicketType>
+
+@{
+    Layout = "_AdminLayout";
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-5">
+                    <div class="card card-info">
+                        <div class="card-header ">
+                            <div class="card-title">Ticket Type</div>
+                            <button class="btn btn-sm btn-default float-right" onclick="add('AddTicketType')">Add New</button>
+                            <div class="text-center mt-3">
+                                <a href="/Ticket/CreateTicket" class="btn btn-dark ">Add Ticket</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    @foreach (var m in Model)
+                                    {
+                                        <div class="info-box bg-info">
+                                            <div class="info-box-content">
+                                                <span class="info-box-text" style="padding-bottom: 5px;"> <b>@m.TicketTypeName</b> </span>
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                                                    <button class="btn btn-sm btn-warning" onclick="edit(@m.Id,'EditTicketType/')"><i class="fas fa-edit"></i> Edit</button>
+                                                    <button type="submit" value="Delete" class="btn btn-danger"
+                                                            onclick="DeleteId(@m.Id)">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <!-- /.info-box-content -->
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+<script>
+    function DeleteId(Id) {
+        alertify.confirm("Are you sure you want to delete this item!",
+            function () {
+                $.post("/ManageTicketType/Delete", { id: Id }, function (response) {
+                    console.log(response);
+
+                    if (response.success) {
+                        toastr.error(response.message);
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    } else {
+                        toastr.warning(response.message);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload()
+            }, 3000);
+        }
+    }
+</script>

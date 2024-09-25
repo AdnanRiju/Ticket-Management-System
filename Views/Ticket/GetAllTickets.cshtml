@@ -1,0 +1,102 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.TicketVm>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Ticket List";
+}
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">Ticket List</div>
+
+                            <div class="text-center mt-3">
+                                <a href="/Ticket/AssignedTickets" class="btn btn-warning float-right">Assigned Tickets</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                                <th>Issued By</th>
+                                               @*  <th>Issued Date</th> *@
+                                                <th>Subject</th>
+                                                <th>Details</th>
+                                                <th>Product</th>
+                                                <th>Status</th>
+                                                <th>Assigned To</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var ticket in Model)
+                                            {
+                                                <tr>
+                                                    <td>@ticket.IssuedByName</td>
+                                                    @* <td>@ticket.IssuedDate.ToString("dd/MM/yyyy")</td>
+                                                    <!-- Ensure this property exists --> *@
+                                                    <td>@ticket.TicketSubject</td>
+                                                    <td>@ticket.TicketDetails</td>
+                                                    <td>@ticket.ProductName</td>
+                                                    <td>
+                                                        @{
+                                                            string statusText;
+                                                            string badgeClass;
+
+                                                            switch (ticket.ActiveStatus)
+                                                            {
+                                                                case 1:
+                                                                    statusText = "Active";
+                                                                    badgeClass = "bg-success"; // Green badge for Active
+                                                                    break;
+                                                                case 2:
+                                                                    statusText = "Processing";
+                                                                    badgeClass = "bg-warning"; // Yellow badge for Processing
+                                                                    break;
+                                                                case 3:
+                                                                    statusText = "Closed";
+                                                                    badgeClass = "bg-secondary"; // Grey badge for Closed
+                                                                    break;
+                                                                case 4:
+                                                                    statusText = "Discarded";
+                                                                    badgeClass = "bg-danger"; // Red badge for Discarded
+                                                                    break;
+                                                                default:
+                                                                    statusText = "Unknown";
+                                                                    badgeClass = "bg-dark"; // Dark badge for Unknown
+                                                                    break;
+                                                            }
+                                                        }
+                                                        <span class="badge @badgeClass fs-6 p-2" style="font-size: 0.875rem; padding: 0.25rem 0.5rem;">@statusText</span>
+                                                    </td>
+                                                    <td>@ticket.AssignedName</td>
+                                                    <td>
+                                                        <a class="btn btn-info mr-1" href="/Ticket/GetTicketDetails/@ticket.Id">
+                                                            <i class="fas fa-list"></i>
+                                                        </a>
+                                                        <a class="btn btn-dark mr-1" href="/Ticket/Assign/@ticket.Id">
+                                                            <i class="fas fa-user-plus"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>

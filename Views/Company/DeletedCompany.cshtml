@@ -1,0 +1,100 @@
+﻿@{
+    Layout = "_AdminLayout";
+    var company = (List<Company>)ViewBag.Company;
+
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">Deleted Company List</div>
+                            <div class="felx">
+                                <a style='margin-right:16px' class="btn btn-dark float-right" href="/Company/CompanyList"> Back to Company</a>
+                            </div>
+                            
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                                <th>Company Name</th>
+                                                <th>Email </th>
+                                                <th>Address</th>
+                                                <th>Active Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var m in company)
+                                            {
+                                                <tr>
+                                                    <td>@m.Name</td>
+                                                    <td>@m.Email</td>
+                                                    <td>@m.Address</td>
+                                                    <th>@m.ActiveCompany</th>
+                                                    <td>
+                                                        <button class="btn btn-danger" type="button"
+                                                                onclick="RestoreCompany('@m.Id')">
+                                                            Restore
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    function RestoreCompany(Id) {
+        alertify.confirm("Are you sure to Restore this Company!",
+            function () {
+                $.post("/Company/RestoreCompany", { id: Id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == MessageType.Success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 200);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload()
+            }, 3000);
+        }
+    }
+</script>

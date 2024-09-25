@@ -1,0 +1,45 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.TicketVm>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Discarded Tickets";
+}
+
+<div class="container">
+    <h2>Closed Tickets</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Ticket No</th>
+                <th>Issued By</th>
+                <th>Issued Date</th>
+                <th>Product</th>
+                <th>Service Type</th>
+                <th>Ticket Type</th>
+                <th>Subject</th>
+                <th>Details</th>
+                <th>Complete By</th>
+                <th>Complete Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ticket in Model)
+            {
+                <tr>
+                    <td>@ticket.TicketNo</td>
+                    <td>@ticket.IssuedByName</td>
+                    <td>@ticket.IssuedDate.ToShortDateString()</td>
+                    <td>@ticket.ProductName</td>
+                    <td>@ticket.ServiceTypeName</td>
+                    <td>@ticket.TicketTypeName</td>
+                    <td>@ticket.TicketSubject</td>
+                    <td>@ticket.TicketDetails</td>
+                    <td>@ticket.CompleteByName</td>
+                    <td>@(ticket.CompleteDate.HasValue ? ticket.CompleteDate.Value.ToShortDateString() : "N/A")</td>
+                    <td>@ticket.ActiveStatus</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

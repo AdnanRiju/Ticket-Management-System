@@ -1,0 +1,140 @@
+﻿@model IEnumerable<dynamic> 
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "User List";
+}
+
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+
+<div class="wrapper">
+    <div class="container-fluid">
+        <form class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">User List</div>
+                            <a class="btn btn-warning float-right" href="/User/ProductManagement">User Product</a>
+                            <button class="btn btn-primary float-right" type="button" onclick="addUser()">Add User</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                                <th>User Name</th>
+                                                <th>Role</th>
+                                                <th>Company Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var user in Model)
+                                            {
+                                                <tr>
+                                                    <td>@user.UserName</td>
+                                                    <td>@user.UserRoleName</td> <!-- Show Role Name -->
+                                                    <td>@user.CompanyName</td> <!-- Show Company Name -->
+                                                    <td>
+                                                        <a class="btn btn-dark mr-1" href="javascript:void(0);" onclick="editUser('@user.Id')"> <i class="fas fa-edit"></i></a>
+                                                        <button class="btn btn-primary" type="button" onclick="resetPassword('@user.Id')"><i class="fas fa-lock"></i></button>
+                                                        <button class="btn btn-danger" type="button" onclick="UserDelete('@user.Id')"><i class="fas fa-trash"></i> </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addUser() {
+        // Open modal for adding a new user
+        $.get('/User/AddUser', function (data) {
+            $('#MainModalBody').html(data);
+            $('#MainModal').modal('show');
+        });
+    }
+
+    function editUser(userId) {
+        // Open modal for editing an existing user
+        $.get('/User/UserEdit/' + userId, function (data) {
+            $('#MainModalBody').html(data);
+            $('#MainModal').modal('show');
+        });
+    }
+
+    function UserDelete(id) {
+        alertify.confirm("Are you sure to delete this User!",
+            function () {
+                $.post("/User/UserDelete", { id: id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == "Success") {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+
+    function resetPassword(userId) {
+        alertify.confirm(
+            'Confirm Password Reset',
+            'Are you sure you want to reset the password for this user?',
+            function () {
+                // User clicked "OK"
+                $.ajax({
+                    url: '@Url.Action("ResetPassword", "User")',
+                    type: 'POST',
+                    data: { id: userId },
+                    success: function (response) {
+                        alert(response.message); // Show success or error message
+                    },
+                    error: function (xhr, status, error) {
+                        alert('An error occurred: ' + xhr.responseText);
+                    }
+                });
+            },
+            function () {
+                // User clicked "Cancel"
+                alertify.error('Password reset canceled.');
+            }
+        );
+    }
+
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true,
+            "lengthChange": false,
+            "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == "Success") {
+            setTimeout(() => {
+                location.reload();
+            }, 300);
+        }
+    }
+</script>

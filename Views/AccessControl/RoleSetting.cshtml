@@ -1,0 +1,239 @@
+﻿@using Microsoft.Extensions.Configuration
+@using CompanyManagement.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = ViewBag.TitleName;
+    Layout = "_AdminLayout";
+    var BaseUrl = Configuration.GetSection("AppSettings")["BaseUrl"];
+    var userRoles = (List<UserRole>)ViewBag.RoleViewModels;
+    var menuItems = (List<MenuItem>)ViewBag.MenuItems;
+}
+<style>
+    .checkbox-list {
+        margin-left: -12.5px;
+    }
+
+    .form-check-label {
+        padding-top: 0.25rem;
+    }
+
+    .para {
+        display: inline-block;
+        padding: 10px !important;
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+
+    .para-box {
+        border: 1px solid #98a2aa;
+        background: #484d50;
+        color: #fff;
+        box-shadow: 1px 1px 5px #909090;
+        border-radius: 5px;
+    }
+</style>
+<div id="role-page">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row mt-2">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Role List</h4>
+                            @if ((int)ViewBag.RoleType == 0)
+                            {
+                                <div class="actionbtn" style="float: right;">
+                                    <button class="btn btn-sm btn-success" onclick="add('/AccessControl/AddRole/')"><i class="fa fa-plus"></i> New Role</button>
+                                </div>
+                            }
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body" style="padding: 1.25rem 0.5rem;">
+                            @if (userRoles != null)
+                            {
+                                foreach (var role in userRoles)
+                                {
+                                    <div class="info-box bg-info">
+                                        <div class="info-box-content">
+                                            <span class="info-box-text" style="padding-bottom: 5px;"> <b>@role.RoleName</b> </span>
+                                            <div class="d-flex align-between">
+                                                @if (role.RoleType > 3)
+                                                {
+                                                    <button class="btn btn-sm btn-warning" onclick="edit(@role.Id,'/Administration/AccessControl/EditRole/')"><i class="fas fa-edit"></i> Edit</button>
+                                                }
+                                                <button class="btn btn-sm btn-default" onclick="LoadRoleMenuItems(@role.Id,'@role.RoleName', '')"><i class="fas fa-cog"></i>Control</button>
+                                            </div>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Menu</h4>
+                        </div>
+                        <!-- /.card-header -->
+                        <div id="menuitem-list" class="card-body">
+                            <div class="role-content" style="min-height: 40px;"></div>
+                            <div class="row card-header bg-info mb-2">
+                                <div class="col-md-3"><strong class="pl-2">Modules</strong></div>
+                                <div class="col-md-9"><strong>Menus</strong></div>
+                            </div>
+                            @if (menuItems != null)
+                            {
+                                foreach (var parentMenu in menuItems)
+                                {
+                                    <div class="_@parentMenu.MenuName" id="parent_@parentMenu.Id">
+                                        <div class="row" style="margin-bottom:5px;">
+                                            <div class="col-md-3">
+                                                <div class="form-check parent-menu">
+                                                    @if (parentMenu.ChildMenus != null)
+                                                    {
+                                                        <input type="checkbox" class="form-check-input" id="@parentMenu.Id" value="@parentMenu.Id" onclick="return false;">
+                                                    }
+                                                    else
+                                                    {
+                                                        <input type="checkbox" class="form-check-input" id="@parentMenu.Id" value="@parentMenu.Id">
+                                                    }
+                                                    <label class="form-check-label">@parentMenu.MenuName</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9">
+                                                @if (parentMenu.ChildMenus != null)
+                                                {
+                                                    <div class="row pb-2">
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input type="checkbox" class="form-check-input checkall" onchange="checkallchild(this, @parentMenu.Id)">
+                                                                <label class="form-check-label text-primary"><strong>Select All</strong></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row checkbox-list mt-2">
+                                                        @foreach (var childmenu in parentMenu.ChildMenus)
+                                                        {
+                                                            <div class="col-md-4">
+                                                                <div class="form-check">
+                                                                    <input type="checkbox" class="form-check-input form" id="@childmenu.Id" value="@childmenu.Id" onchange="checkParent(@parentMenu.Id)">
+                                                                    <label class="form-check-label">@childmenu.MenuName</label>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+                <div id="MainModalBody"></div>
+            </div>
+        </div>
+    </section>
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+</div>
+<script>
+    $(document).ready(function () {
+        hideloading();
+    });
+    //Div onClick checkbox checked or uncheck
+    function checkallchild(element, parentId) {
+        var checkchildchecked = $('#parent_' + parentId).find(".checkbox-list").find(":checkbox");
+        checkchildchecked.each(function () {
+            $(this).prop("checked", element.checked);
+        });
+        $('#' + parentId).prop("checked", element.checked);
+
+    }
+
+    const checkParent = function (parentId) {
+        var checkchildchecked = $('#parent_' + parentId).find(".checkbox-list").find(":checkbox");
+        var anycheckedchiled = false;
+        checkchildchecked.each(function () {
+            if (this.checked) {
+                anycheckedchiled = true;
+            }
+        });
+        $('#' + parentId).prop("checked", anycheckedchiled);
+    }
+
+    function LoadRoleMenuItems(roleId, roleName, roleTemplate) {
+        $('#menuitem-list input:checkbox').each(function () {
+            if (this.checked) {
+                $(this).prop("checked", false);
+            }
+        });
+        $.ajax({
+            url: '/AccessControl/LoadDetails',
+            type: 'GET',
+            data: { 'roleId': roleId },
+            contentType: 'application/json',
+            success: function (data) {
+                $.each(data.MenuItems, function (key, value) {
+                    if (value.IsParent == true) {
+                        $.each(value.ChildMenus, function (childkey, childvalue) {
+                            $('#' + childvalue.Id).prop("checked", true);
+                        });
+                    }
+                    $('#' + value.Id).prop("checked", true);
+                });
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+        var roledivcontent = '<div class="row pb-2 pl-1">';
+        roledivcontent += '<div class="col-md-3">';
+        roledivcontent += '<button class="btn btn-success" onclick="SaveRoleMenuItems()">Update Access</button>';
+        roledivcontent += '</div>';
+        roledivcontent += '<div class="col-md-9">';
+        roledivcontent += '<div class="para-box">';
+        roledivcontent += '<input type="hidden" name="roleId" id="roleId" value="' + roleId + '" />';
+        roledivcontent += '<p class="para">Selected Role  :  </p><strong>' + roleName + '</strong>';
+        roledivcontent += '</div>';
+        roledivcontent += '</div>';
+        roledivcontent += '</div>';
+        $('.role-content').html(roledivcontent);
+        $('#save-section').removeClass('hide');
+    }
+    var SaveRoleMenuItems = function () {
+        var roleviewmodel = [];
+        var roleid = $("#roleId").val();
+        $('#menuitem-list input:checkbox').each(function () {
+            if (this.checked) {
+                var role = { UserRoleId: parseInt(roleid), MenuItemId: parseInt($(this).val()) };
+                roleviewmodel.push(role);
+            }
+        });
+        var roleMenuJson = JSON.stringify({ 'rolemenu': roleviewmodel });
+        $.ajax({
+            url: '/AccessControl/UpdateMenuAccess',
+            type: 'POST',
+            data: { 'rolemenu': roleviewmodel },
+    @*contentType: 'application/json',*@
+            success: function (data) {
+                ToastNotification(data);
+            },
+            error: function () {
+                alert("error");
+            }
+            });
+        }
+</script>
+@*@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+ }*@

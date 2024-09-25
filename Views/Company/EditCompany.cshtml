@@ -1,0 +1,59 @@
+﻿@model CompanyManagement.Models.Company
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+            <span><b>Update Information</b></span>
+            <button type="button" class="close trigger-reload text-white" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form asp-controller="Company" asp-action="EditCompany"
+                  data-ajax-begin="onBegin" data-ajax-complete="onComplete"
+                  data-ajax-failure="onFailed" data-ajax-success="onSuccess"
+                  data-ajax="true" data-ajax-method="POST" autocomplete="off">
+                @Html.AntiForgeryToken()
+                <div class="card-body">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="ShortName" />
+                </div>
+                <div class="form-group row">
+                    <label for="Name" class="col-md-4 col-form-label">Company Name</label>
+                    <div class="col-md-8">
+                        <input class="form-control" asp-for="Name" required="required" placeholder="Name" />
+                        <span class="text-danger field-validation-valid" asp-validation-for="Name" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="Email" class="col-md-4 col-form-label">Email</label>
+                    <div class="col-md-8">
+                        <input class="form-control" asp-for="Email" required="required" placeholder="Email" />
+                        <span class="text-danger field-validation-valid" asp-validation-for="Email" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="PhoneNumber" class="col-md-4 col-form-label">Contact Number</label>
+                    <div class="col-md-8">
+                        <input class="form-control" asp-for="PhoneNumber" required="required" placeholder="Phone Number" />
+                        <span class="text-danger field-validation-valid" asp-validation-for="PhoneNumber" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="Address" class="col-md-4 col-form-label">Address</label>
+                    <div class="col-md-8">
+                        <input class="form-control" asp-for="Address" required="required" placeholder="Address" />
+                        <span class="text-danger field-validation-valid" asp-validation-for="Address" data-valmsg-replace="true"></span>
+                    </div>
+                </div>
+                <div class="modal-footer float-right">
+                    <input type="submit" class="btn btn-sm btn-success" value="Save" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

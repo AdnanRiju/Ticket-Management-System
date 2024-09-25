@@ -1,0 +1,136 @@
+﻿@model IEnumerable<CompanyManagement.Models.Company>
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Company List";
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <h2>Company List</h2>
+                            </div>
+                            <div class="container mt-0">
+                                <div class="d-flex justify-content-end mb-3">
+                                    <button class="btn btn-primary me-2" onclick="add('AddCompany')">Add Company</button>
+                                    <a class="btn btn-secondary me-2" href="/Company/DeletedCompany">Inactive Company</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                 @foreach (var company in Model)
+                    {       
+                        <div class="col-md-4 d-flex align-items-stretch flex-column">             
+                            <div class="card bg-light d-flex flex-fill">
+                                <div class="card-header text-muted border-bottom-0">
+                                      
+                                </div>
+                                <div class="card-body pt-0">                   
+                                    <div class="row">                         
+                                        <div class="col-7">
+                                            <h5 class="lead"><b>@company.Name</b></h5>
+                    
+                                            <ul class="ml-4 mb-0 fa-ul text-muted">
+                                            <li class="small"><span class="fa-li col-1"><i class="fas fa-lg fa-building"></i></span> @company.Address</li>
+                                            <li class="small"><span class="fa-li col-1"><i class="fas fa-lg fa-phone"></i></span> @company.PhoneNumber</li>
+                                             <li class="small"><span class="fa-li col-1"><i class="fas fa-lg fa-envelope"></i></span> @company.Email</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-5 text-center">
+                                            <img src="/dist/img/avatar4.png" alt="user-avatar" class="img-circle img-fluid">
+                                        </div>                    
+                                    </div>                    
+                                </div>
+                                <div class="card-footer">
+                                    <div class="text-right">
+                                       <button class="btn btn-danger btn-sm" type="button" onclick="CompanyDelete('@company.Id')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                                <button class="btn btn-info btn-sm" type="button" onclick="editCompany('@company.Id')">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                        <a href="@Url.Action("CompanyDetails", "Company", new { id = company.Id })" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-user"></i> View Profile
+                                        </a>
+                                    </div>
+                                </div>                
+                            </div>            
+                        </div>
+                    }
+                    </div>
+          </div>
+          </div>
+          </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function CompanyDelete(Id) {
+        alertify.confirm("Are you sure to delete this Company?",
+            function () {
+                $.post("/Company/CompanyDelete", { id: Id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == MessageType.Success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    $(function () {
+        // Initialize any required JavaScript plugins or functions here
+    });
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }
+    }
+    function editCompany(userId) {
+        // Open modal for editing an existing user
+        $.get('/Company/EditCompany/' + userId, function (data) {
+            $('#MainModalBody').html(data);
+            $('#MainModal').modal('show');
+        });
+    }
+
+        let isSubmitting = false;
+
+    function onBegin() {
+        if (isSubmitting) {
+            return false; // Prevent multiple submissions
+        }
+        isSubmitting = true;
+        $('input[type="submit"]').prop('disabled', true); // Disable button
+    }
+
+    function onComplete() {
+        isSubmitting = false; // Reset flag
+        $('input[type="submit"]').prop('disabled', false); // Re-enable button
+    }
+
+    function onSuccess(context) {
+        ToastNotification(context);
+        if (context.MessageType === "Success") {
+            setTimeout(() => {
+                location.reload();
+            }, 1000); // Adjust timing if needed
+        }
+    }
+</script>

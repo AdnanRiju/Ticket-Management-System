@@ -1,0 +1,63 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.TicketVm>
+
+@{
+    Layout = "_AdminLayout"; // Adjust the layout as needed
+}
+
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Total Tickets</h1>
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    
+                                    <th>Issued By</th>
+                                    <th>Issued Date</th>
+                                    <th>Product</th>
+                                 
+                                    <th>Subject</th>
+                                    <th>Details</th>
+                                    <th>Complete By</th>
+                                    <th>Complete Date</th>
+                                    
+                                    <th>Assigned To</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var ticket in Model)
+                                {
+                                    <tr>
+                                        <td>@ticket.TicketId</td>
+                                      
+                                        <td>@ticket.IssuedByName</td>
+                                        <td>@ticket.IssuedDate.ToString("d")</td>
+                                        <td>@ticket.ProductName</td>
+                                        <td>@ticket.TicketSubject</td>
+                                        <td>@ticket.TicketDetails</td>
+                                        <td>@ticket.CompleteByName</td>
+                                        <td>@ticket.CompleteDate?.ToString("d")</td>
+                                        
+                                        <td>@ticket.AssignedName</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->

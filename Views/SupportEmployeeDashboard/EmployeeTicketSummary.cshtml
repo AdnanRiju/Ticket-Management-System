@@ -1,0 +1,41 @@
+﻿@model IEnumerable<CompanyManagement.ViewModel.TicketSummary>
+@{
+    Layout = "_AdminLayout";
+    var ticketSummaries = Model.ToList(); // Get data from the model
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        @{
+            int i = 0;
+            string[] classlist = { "bg-info", "bg-success", "bg-warning", "bg-danger", "bg-primary" };
+            string[] iclasslist = { "ion-bag", "ion-stats-bars", "ion-person-add", "ion-pie-graph", "ion-ios-list" };
+            string[] urls = { "/Dashboard/ActiveTickets", "/Dashboard/ProcessingTickets", "/Dashboard/ClosedTickets", "/Dashboard/TotalTickets", "/Dashboard/GetAllTickets" };
+
+            foreach (var dt in Model)
+            {
+                var index = i % 5; // Cycle through the 5 styles
+                i++;
+
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box @classlist[index]">
+                        <div class="inner">
+                            <h3>@dt.StatusCount</h3>
+                            <p>@dt.ActiveStatusString</p>
+                        </div>
+                        <div class="icon">
+                            <i class="ion @iclasslist[index]"></i>
+                        </div>
+                        <a href="@urls[index]" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+else
+{
+    <p>No tickets available for this user.</p>
+}

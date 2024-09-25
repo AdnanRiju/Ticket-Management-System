@@ -1,0 +1,64 @@
+  public List<MenuItemVm> GetMenuItemForUser(long roleId)
+  {
+      var menuitems = new List<MenuItem>();
+      try
+      {
+          if (roleId == 1)
+          {
+              menuitems = _context.MenuItem.ToList();
+          }
+          else
+          {
+              var menuids = _context.RoleType.Where(i => i.SetRoleValue == roleId).Select(i => i.Id).ToList();
+              menuitems = _context.MenuItem.Where(i => menuids.Contains(i.Id)).OrderBy(i => i.MenuOrder).ToList();
+          }
+          menuitems = menuitems.Where(i => i.ParentId == null).OrderBy(i => i.MenuOrder).ToList();
+          foreach (var parentmenu in menuitems)
+          {
+              if (parentmenu.IsParent && parentmenu.ChildMenus != null)
+              {
+                  parentmenu.ChildMenus = parentmenu.ChildMenus.OrderBy(i => i.MenuOrder).ToList();
+              }
+          }
+          return GenericMapper<MenuItem, MenuItemVm>.GetDestinationList(menuitems);
+      }
+      catch (Exception e)
+      {
+          Console.WriteLine(e.Message);
+          return new List<MenuItemVm>();
+      }
+
+  }
+This is Role page
+ public IActionResult Login(AppUser model)
+ {
+     var user = _context.AppUser.
+         Where(i => i.UserId == model.UserId && i.UserPassword == model.UserPassword) 
+         .FirstOrDefault();
+     //    if (user == null || user.ActiveStatus == 0 || user.UserPassword != model.UserPassword || user.UserName != model.UserName)
+     //    {
+     //          ModelState.AddModelError(string.Empty, "Invalid username or password.");
+     //return View(model);
+     //    }
+     if (user == null || user.ActiveStatus == 0)
+     {
+         ViewData["ErrorMessage"] = "Invalid username or password.";
+         return View(model);
+     }
+
+     else
+     {
+         HttpContext.Session.SetInt32("userid", Convert.ToInt32(user.Id));
+
+         var menuItems = _context.RoleType.GetMenuItemForUser(user.RoleTypeId).ToList();
+         SetSession(menuItems);
+
+
+         user.LoginTime = DateTime.Now;
+         _context.SaveChanges();
+         return (user.RoleTypeId<=2) ? RedirectToAction("AdDashboard", "Dashboard") : RedirectToAction("UDashboard", "Dashboard");
+         
+         
+     }
+ }
+this is login page. I want to call GetMenuItemForUser from the role controller. How can i do so?

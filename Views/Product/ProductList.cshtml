@@ -1,0 +1,108 @@
+﻿@using CompanyManagement.ViewModel
+
+@{
+    Layout = "_AdminLayout";
+    var product = (List<VmProduct>)ViewBag.Product;
+    ViewData["Title"] = "Product List";
+
+}
+<partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+<div class="wrapper">
+    <div class="container-fluid">
+        <section class="content">
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <div class="card-title"> Product List</div>
+                            <div class="felx">
+                                <button style='margin-right:16px' class="btn btn-sm btn-primary float-right" onclick="add('AddProduct')">Add New Product</button>
+                            </div>
+                            <div class="felx">
+                                <button style='margin-right:16px' class="btn btn-sm btn-dark float-right" onclick="add('AddProductType')">Add New Product type</button>
+                            </div>
+                            <div class="flex">
+                                <a style='margin-right:16px' class="btn btn-sm btn-warning float-right" href="/Product/DeletedProduct">Deleted Product</a>
+                            </div>
+
+                            <div class="flex">
+                                <a style='margin-right:16px' class="btn btn-sm btn-secondary float-right" href="/Product/ProductTypeList">Product Type List</a>
+                            </div>
+
+
+
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped dataTable dtr-inline">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Product Type</th>
+                                                <th>CreateDate</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var m in product)
+                                            {
+                                                <tr>
+                                                    <td>@m.ProductName</td>
+                                                    <td>@m.Product_Type</td>
+                                                    <td>@m.CreateDate.ToString("dd/MM/yyyy")</td>
+                                                     <td>
+                                                        <a class="btn btn-dark mr-1" onclick="edit('@m.Id','EditProduct/')">Edit </a>
+                                                        <button class="btn btn-danger" type="button" onclick="ProductDelete('@m.Id')">
+                                                            Delete
+                                                        </button>
+                                                    </td> 
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="modal fade" id="MainModal" role="dialog" aria-labelledby="MainModal" aria-hidden="true">
+            <div id="MainModalBody"></div>
+        </div>
+    </div>
+</div>
+<script>
+    function ProductDelete(Id) {
+        alertify.confirm("Are you sure to delete this User!",
+            function () {
+                $.post("/Product/ProductDelete", { id: Id }, function (context) {
+                    ToastNotification(context);
+                    if (context.MessageType == MessageType.Success) {
+                        setTimeout(() => {
+                            location.reload();
+                        }, 300);
+                    }
+                });
+            },
+            function () {
+                alertify.error('Cancel');
+            }
+        );
+    }
+    $(function () {
+        $(".dataTable").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false,
+            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+    });
+    function onSuccessForTicket(context) {
+        ToastNotification(context);
+        if (context.MessageType == MessageType.Success) {
+            setTimeout(() => {
+                location.reload()
+            }, 3000);
+        }
+    }
+</script>
